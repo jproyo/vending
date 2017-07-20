@@ -20,13 +20,19 @@ import java.util.UUID;
 /**
  * The Class Item.
  */
-public class Item {
-	
+public class ItemResult {
+
 	/** The id. */
 	private String id = UUID.randomUUID().toString();
 	
 	/** The product. */
 	private Product product;
+
+	/** The change. */
+	private Float change;
+	
+	/** The result. */
+	private Result result = Result.delivered;
 
 	/**
 	 * Gets the id.
@@ -86,7 +92,7 @@ public class Item {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		Item other = (Item) obj;
+		ItemResult other = (ItemResult) obj;
 		if (id == null) {
 			if (other.id != null)
 				return false;
@@ -94,7 +100,76 @@ public class Item {
 			return false;
 		return true;
 	}
+
+	/**
+	 * Sets the change.
+	 *
+	 * @param change the new change
+	 */
+	public void setChange(Float change) {
+		this.change = change;
+	}
+	
+
+	/**
+	 * Gets the change.
+	 *
+	 * @return the change
+	 */
+	public Float getChange() {
+		return change;
+	}
+	
+	/**
+	 * Gets the result.
+	 *
+	 * @return the result
+	 */
+	public Result getResult() {
+		return result;
+	}
+	
+	/**
+	 * Sets the result.
+	 *
+	 * @param result the new result
+	 */
+	public void setResult(Result result) {
+		this.result = result;
+	}
 	
 	
+	
+	/**
+	 * The Enum Result.
+	 */
+	public enum Result {
+		
+		/** The delivered. */
+		delivered,
+		
+		/** The insufficient funds. */
+		insufficientFunds,
+		
+		/** The no stock. */
+		noStock
+
+	}
+
+
+
+	/**
+	 * No stock.
+	 *
+	 * @param currentOrder the current order
+	 * @return the item result
+	 */
+	public static ItemResult noStock(ProductOrder currentOrder) {
+		ItemResult result = new ItemResult();
+		result.setResult(Result.noStock);
+		result.setChange(currentOrder.getImportPayed());
+		result.setProduct(currentOrder.getProductRequested());
+		return result;
+	}
 
 }

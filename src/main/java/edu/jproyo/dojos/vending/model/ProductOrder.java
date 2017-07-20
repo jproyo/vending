@@ -15,6 +15,10 @@
  */
 package edu.jproyo.dojos.vending.model;
 
+import java.util.HashSet;
+import java.util.Set;
+
+import edu.jproyo.dojos.vending.model.ItemResult.Result;
 import edu.jproyo.dojos.vending.model.OrderResult.OrderResultStatus;
 
 /**
@@ -29,10 +33,22 @@ public class ProductOrder {
 	/** The status. */
 	private ProductOrderStatus status = ProductOrderStatus.noSelected;
 	
+	/** The import payed. */
+	private Float importPayed = 0.0f;
+
+	/** The accepted coins. */
+	private Set<Float> acceptedCoins = new HashSet<>();
+	
 	/**
 	 * Instantiates a new product order.
 	 */
 	public ProductOrder(){
+		this.acceptedCoins.add(0.05f);
+		this.acceptedCoins.add(0.10f);
+		this.acceptedCoins.add(0.20f);
+		this.acceptedCoins.add(0.50f);
+		this.acceptedCoins.add(1.0f);
+		this.acceptedCoins.add(2.0f);
 	}
 	
 	/**
@@ -41,9 +57,10 @@ public class ProductOrder {
 	 * @param requested the requested
 	 */
 	public ProductOrder(Product requested){
+		this();
 		this.productRequested = requested;
 		if(!requested.isNotSelected()){
-			this.status = ProductOrderStatus.paymentPending;
+			this.status = ProductOrderStatus.insuffientFund;
 		}
 	}
 
@@ -64,15 +81,6 @@ public class ProductOrder {
 	public void setStatus(ProductOrderStatus status) {
 		this.status = status;
 	}
-	
-	/**
-	 * Checks if is being proccessed.
-	 *
-	 * @return true, if is being proccessed
-	 */
-	public boolean isBeingProccessed() {
-		return ProductOrderStatus.processing.equals(status);
-	}
 
 	/**
 	 * Payment pending.
@@ -80,7 +88,16 @@ public class ProductOrder {
 	 * @return true, if successful
 	 */
 	public boolean paymentPending() {
-		return ProductOrderStatus.paymentPending.equals(status);
+		return !paymentReady();
+	}
+	
+	/**
+	 * Payment ready.
+	 *
+	 * @return true, if successful
+	 */
+	public boolean paymentReady() {
+		return importPayed >= getProductRequested().getPrice();
 	}
 	
 	/**
@@ -100,6 +117,70 @@ public class ProductOrder {
 	public void setProductRequested(Product productRequested) {
 		this.productRequested = productRequested;
 	}
+	
+	/**
+	 * Adds the payment.
+	 *
+	 * @param coin the coin
+	 */
+	public void addPayment(Float coin){
+		if(acceptedCoins.contains(coin)){
+			importPayed += coin;
+		}else{
+			throw new IllegalStateException("Coin "+coin+"€ is not accepted for this payment");
+		}
+		if(paymentReady()){
+			this.status = ProductOrderStatus.paymentReady;
+		}
+	}
+
+	/**
+	 * Cancel.
+	 *
+	 * @return the order result
+	 */
+	public OrderResult cancel() {
+		OrderResult result = new OrderResult();
+		switch(getStatus()){
+		case delivered: 
+			result.setStatus(OrderResultStatus.alreadyDelivered);
+			break;
+		case paymentReady:
+		case insuffientFund:
+		case noSelected:
+			result.setStatus(OrderResultStatus.cancelled);
+			result.setRefund(getImportPayed());
+			break;
+		}
+		return result;
+	}
+
+	/**
+	 * Gets the import payed.
+	 *
+	 * @return the import payed
+	 */
+	public Float getImportPayed() {
+		return importPayed;
+	}
+
+	/**
+	 * Sets the import payed.
+	 *
+	 * @param importPayed the new import payed
+	 */
+	public void setImportPayed(Float importPayed) {
+		this.importPayed = importPayed;
+	}
+
+	/**
+	 * Gets the change.
+	 *
+	 * @return the change
+	 */
+	public Float getChange() {
+		return this.importPayed - getProductRequested().getPrice();
+	}
 
 	/**
 	 * The Enum ProductOrderStatus.
@@ -107,10 +188,7 @@ public class ProductOrder {
 	public enum ProductOrderStatus {
 		
 		/** The payment pending. */
-		paymentPending,
-		
-		/** The processing. */
-		processing,
+		paymentReady,
 		
 		/** The delivered. */
 		delivered,
@@ -134,40 +212,20 @@ public class ProductOrder {
 	}
 
 	/**
-	 * Cancel.
+	 * Dispatch.
 	 *
-	 * @return the order result
+	 * @return the item result
 	 */
-	public OrderResult cancel() {
-		OrderResult result = new OrderResult();
-		switch(getStatus()){
-		case delivered: 
-			result.setStatus(OrderResultStatus.alreadyDelivered);
-			break;
-		case paymentPending:
-		case insuffientFund:
-		case noSelected:
-			result.setStatus(OrderResultStatus.cancelled);
-			break;
-		case processing:
-			if(cancelProcessing()){
-				result.setStatus(OrderResultStatus.cancelled);
-			}else{
-				result.setStatus(OrderResultStatus.couldNotBeCancelled);
-			}
-			break;
+	public ItemResult dispatch() {
+		ItemResult result = new ItemResult();
+		result.setProduct(getProductRequested());
+		if(paymentReady()){
+			result.setResult(Result.delivered);
+			result.setChange(getChange());
+		}else{
+			result.setResult(Result.insufficientFunds);
 		}
 		return result;
-	}
-
-	/**
-	 * Cancel processing.
-	 *
-	 * @return true, if successful
-	 */
-	private boolean cancelProcessing() {
-		// TODO Auto-generated method stub
-		return false;
 	}
 	
 

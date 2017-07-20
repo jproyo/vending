@@ -17,16 +17,20 @@ package edu.jproyo.dojos.vending.machine;
 
 import java.util.Optional;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import edu.jproyo.dojos.vending.VendingMachine;
 import edu.jproyo.dojos.vending.machine.dataaccess.MachineRepository;
 import edu.jproyo.dojos.vending.machine.dataaccess.memory.OnMemoryRepository;
+import edu.jproyo.dojos.vending.model.ItemResult;
 import edu.jproyo.dojos.vending.model.OrderResult;
 import edu.jproyo.dojos.vending.model.ProductOrder;
 import edu.jproyo.dojos.vending.model.ProductRequest;
-import edu.jproyo.dojos.vending.model.ResetResult;
 import edu.jproyo.dojos.vending.model.ResetStatus;
 
 /**
@@ -36,15 +40,45 @@ public class MachineImpl implements VendingMachine {
 
 	/** The repository. */
 	private MachineRepository repository;
+	
+	/** The current order. */
+	private ProductOrder currentOrder;
 
 	/* (non-Javadoc)
 	 * @see edu.jproyo.dojos.vending.VendingMachine#select(edu.jproyo.dojos.vending.model.ProductRequest)
 	 */
 	@Override
 	public ProductOrder select(ProductRequest request) {
-		return Optional.ofNullable(repository().getProduct(request.getType()))
+		if(currentOrder != null) return currentOrder;
+		currentOrder = Optional.ofNullable(repository().getProduct(request.getType()))
 			.map(ProductOrder::new)
 			.orElse(ProductOrder.noSelected());
+		return currentOrder;
+	}
+	
+	/* (non-Javadoc)
+	 * @see edu.jproyo.dojos.vending.VendingMachine#insertCoin(java.lang.Float)
+	 */
+	@Override
+	public ProductOrder insertCoin(Float coin) {
+		currentOrder.addPayment(coin);
+		return currentOrder;
+	}
+	
+	/* (non-Javadoc)
+	 * @see edu.jproyo.dojos.vending.VendingMachine#dispatch()
+	 */
+	@Override
+	public ItemResult dispatch() {
+		if(repository().productAvailable(currentOrder.getProductRequested().getType())){
+			ItemResult item = currentOrder.dispatch();
+			if(item != null){
+				repository().updateStock(item);
+			}
+			return item;
+		}else{
+			return ItemResult.noStock(currentOrder);
+		}
 	}
 
 	/* (non-Javadoc)
@@ -59,15 +93,29 @@ public class MachineImpl implements VendingMachine {
 	 * @see edu.jproyo.dojos.vending.VendingMachine#reset()
 	 */
 	@Override
-	public ResetResult reset() {
-		Future<ResetStatus> submit = Executors.newSingleThreadExecutor().submit(new Callable<ResetStatus>() {
+	public ResetStatus reset() {
+		ExecutorService executor = Executors.newSingleThreadExecutor();
+		Future<ResetStatus> submit = executor.submit(new Callable<ResetStatus>() {
 			@Override
 			public ResetStatus call() throws Exception {
 				Thread.sleep(1500l);
 				return ResetStatus.reseted;
 			}
 		});
-		return new ResetResult(submit);
+		ResetStatus resetStatus = ResetStatus.couldNotBeReset;
+		try {
+			resetStatus = submit.get(5, TimeUnit.SECONDS);
+			executor.shutdown();
+			if(!executor.awaitTermination(5, TimeUnit.SECONDS)){
+				executor.shutdownNow();
+			}
+		} catch (InterruptedException e) {
+		} catch (ExecutionException e) {
+		} catch (TimeoutException e) {
+		}finally{
+			currentOrder = null;
+		}
+		return resetStatus;
 	}
 	
 	/**

@@ -17,8 +17,11 @@ package edu.jproyo.dojos.vending.machine.dataaccess.memory;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
 
 import edu.jproyo.dojos.vending.machine.dataaccess.MachineRepository;
+import edu.jproyo.dojos.vending.model.ItemResult;
 import edu.jproyo.dojos.vending.model.Product;
 import edu.jproyo.dojos.vending.model.ProductType;
 
@@ -29,6 +32,9 @@ public class OnMemoryRepository implements MachineRepository {
 	
 	/** The products. */
 	private Map<ProductType, Product> products = new HashMap<>(); 
+	
+	/** The items. */
+	private ConcurrentHashMap<ProductType, AtomicLong> items = new ConcurrentHashMap<>(); 
 
 	/* (non-Javadoc)
 	 * @see edu.jproyo.dojos.vending.machine.dataaccess.MachineRepository#getProduct(edu.jproyo.dojos.vending.model.ProductType)
@@ -36,6 +42,22 @@ public class OnMemoryRepository implements MachineRepository {
 	@Override
 	public Product getProduct(ProductType type) {
 		return getProducts().get(type);
+	}
+	
+	/* (non-Javadoc)
+	 * @see edu.jproyo.dojos.vending.machine.dataaccess.MachineRepository#productAvailable(edu.jproyo.dojos.vending.model.ProductType)
+	 */
+	@Override
+	public boolean productAvailable(ProductType type) {
+		return getItems().get(type).get() > 0l;
+	}
+	
+	/* (non-Javadoc)
+	 * @see edu.jproyo.dojos.vending.machine.dataaccess.MachineRepository#updateStock(edu.jproyo.dojos.vending.model.ItemResult)
+	 */
+	@Override
+	public long updateStock(ItemResult item) {
+		return getItems().get(item.getProduct().getType()).getAndDecrement();
 	}
 
 	/**
@@ -48,12 +70,30 @@ public class OnMemoryRepository implements MachineRepository {
 	}
 
 	/**
+	 * Gets the items.
+	 *
+	 * @return the items
+	 */
+	public ConcurrentHashMap<ProductType, AtomicLong> getItems() {
+		return items;
+	}
+	
+	/**
 	 * Sets the products.
 	 *
 	 * @param products the products
 	 */
 	public void setProducts(Map<ProductType, Product> products) {
 		this.products = products;
+	}
+	
+	/**
+	 * Sets the items.
+	 *
+	 * @param items the items
+	 */
+	public void setItems(ConcurrentHashMap<ProductType, AtomicLong> items) {
+		this.items = items;
 	}
 
 }

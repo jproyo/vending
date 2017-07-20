@@ -8,11 +8,13 @@ import org.junit.Test;
 import edu.jproyo.dojos.vending.machine.MachineImpl;
 import edu.jproyo.dojos.vending.machine.VendingMachineBuilder;
 import edu.jproyo.dojos.vending.machine.dataaccess.MachineRepository;
+import edu.jproyo.dojos.vending.model.ItemResult;
+import edu.jproyo.dojos.vending.model.ItemResult.Result;
 import edu.jproyo.dojos.vending.model.OrderResult;
 import edu.jproyo.dojos.vending.model.ProductOrder;
 import edu.jproyo.dojos.vending.model.ProductRequest;
 import edu.jproyo.dojos.vending.model.ProductType;
-import edu.jproyo.dojos.vending.model.ResetResult;
+import edu.jproyo.dojos.vending.model.ResetStatus;
 import edu.jproyo.dojos.vending.utils.TestHelper;
 
 public class VendingMachineIntegrationTest {
@@ -30,7 +32,93 @@ public class VendingMachineIntegrationTest {
 		ProductOrder order = target.select(ProductRequest.create().type(ProductType.coke).build());
 		assertNotNull(order);
 		assertTrue(order.paymentPending());
-		assertFalse(order.isBeingProccessed());
+	}
+	
+	@Test
+	public void testInsertCoins() {
+		ProductOrder order = target.select(ProductRequest.create().type(ProductType.coke).build());
+		assertNotNull(order);
+		assertTrue(order.paymentPending());
+		assertNotNull(target.insertCoin(0.20f));
+		assertNotNull(target.insertCoin(0.20f));
+		assertNotNull(target.insertCoin(0.20f));
+		assertNotNull(target.insertCoin(0.20f));
+		assertNotNull(target.insertCoin(0.20f));
+		assertNotNull(target.insertCoin(0.20f));
+		assertNotNull(target.insertCoin(0.20f));
+		ProductOrder insertCoin = target.insertCoin(0.20f);
+		assertNotNull(insertCoin);
+		assertTrue(insertCoin.paymentReady());
+	}
+	
+	@Test
+	public void testInsertCoins_not_accepted() {
+		ProductOrder order = target.select(ProductRequest.create().type(ProductType.coke).build());
+		assertNotNull(order);
+		assertTrue(order.paymentPending());
+		assertNotNull(target.insertCoin(0.20f));
+		assertNotNull(target.insertCoin(0.20f));
+		assertNotNull(target.insertCoin(0.20f));
+		try {
+			target.insertCoin(0.23f);
+			fail();
+		} catch (Exception e) {
+		}
+	}
+	
+	@Test
+	public void testDispatch_ok() {
+		ProductOrder order = target.select(ProductRequest.create().type(ProductType.coke).build());
+		assertNotNull(order);
+		assertTrue(order.paymentPending());
+		assertNotNull(target.insertCoin(1f));
+		assertNotNull(target.insertCoin(0.50f));
+		ItemResult dispatch = target.dispatch();
+		assertNotNull(dispatch);
+		assertEquals(new Float(0.0f), dispatch.getChange());
+		assertEquals(Result.delivered, dispatch.getResult());
+	}
+	
+	@Test
+	public void testDispatch_with_refund() {
+		ProductOrder order = target.select(ProductRequest.create().type(ProductType.coke).build());
+		assertNotNull(order);
+		assertTrue(order.paymentPending());
+		assertNotNull(target.insertCoin(1f));
+		assertNotNull(target.insertCoin(0.50f));
+		assertNotNull(target.insertCoin(0.50f));
+		ItemResult dispatch = target.dispatch();
+		assertNotNull(dispatch);
+		assertEquals(new Float(0.5f), dispatch.getChange());
+		assertEquals(Result.delivered, dispatch.getResult());
+	
+	}
+	
+	@Test
+	public void testDispatch_insufficients_funds() {
+		ProductOrder order = target.select(ProductRequest.create().type(ProductType.coke).build());
+		assertNotNull(order);
+		assertTrue(order.paymentPending());
+		assertNotNull(target.insertCoin(1f));
+		ItemResult dispatch = target.dispatch();
+		assertNotNull(dispatch);
+		assertEquals(Result.insufficientFunds, dispatch.getResult());
+	}
+
+	@Test
+	public void testDispatch_insufficients_funds_after_pay_and_dispatch() {
+		ProductOrder order = target.select(ProductRequest.create().type(ProductType.coke).build());
+		assertNotNull(order);
+		assertTrue(order.paymentPending());
+		assertNotNull(target.insertCoin(1f));
+		ItemResult dispatch = target.dispatch();
+		assertNotNull(dispatch);
+		assertEquals(Result.insufficientFunds, dispatch.getResult());
+		assertNotNull(target.insertCoin(0.5f));
+		ItemResult dispatch2 = target.dispatch();
+		assertNotNull(dispatch2);
+		assertEquals(new Float(0f), dispatch2.getChange());
+		assertEquals(Result.delivered, dispatch2.getResult());
 	}
 
 	@Test
@@ -45,15 +133,9 @@ public class VendingMachineIntegrationTest {
 
 	@Test
 	public void testReset() {
-		ResetResult reset = target.reset();
+		ResetStatus reset = target.reset();
 		assertNotNull(reset);
-		assertTrue(reset.reseting());
-		try {
-			Thread.sleep(2000l);
-		} catch (InterruptedException e) {
-			fail();
-		}
-		assertTrue(reset.reseted());
+		assertEquals(ResetStatus.reseted, reset);
 	}
 
 }

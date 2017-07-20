@@ -23,6 +23,9 @@ public class OrderResult {
 
 	/** The status. */
 	private OrderResultStatus status = OrderResultStatus.noop;
+	
+	/** The refund. */
+	private Float refund;
 
 	/**
 	 * Gets the status.
@@ -55,7 +58,7 @@ public class OrderResult {
 	 * The Enum OrderResultStatus.
 	 */
 	public enum OrderResultStatus {
-		
+		delivered,
 		/** The cancelled. */
 		cancelled,
 		/** The already delivered. */
@@ -65,6 +68,24 @@ public class OrderResult {
 		/** The noop. */
 		noop
 
+	}
+
+	/**
+	 * Sets the refund.
+	 *
+	 * @param refund the new refund
+	 */
+	public void setRefund(Float refund) {
+		this.refund = refund;
+	}
+	
+	/**
+	 * Gets the refund.
+	 *
+	 * @return the refund
+	 */
+	public Float getRefund() {
+		return refund;
 	}
 
 }

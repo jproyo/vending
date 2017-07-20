@@ -5,10 +5,14 @@ import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
+import edu.jproyo.dojos.vending.machine.MachineImpl;
+import edu.jproyo.dojos.vending.machine.VendingMachineBuilder;
+import edu.jproyo.dojos.vending.machine.dataaccess.MachineRepository;
 import edu.jproyo.dojos.vending.model.OrderResult;
 import edu.jproyo.dojos.vending.model.ProductOrder;
 import edu.jproyo.dojos.vending.model.ProductRequest;
 import edu.jproyo.dojos.vending.model.ProductType;
+import edu.jproyo.dojos.vending.utils.TestHelper;
 
 public class VendingMachineIntegrationTest {
 	
@@ -16,7 +20,8 @@ public class VendingMachineIntegrationTest {
 	
 	@Before
 	public void setup(){
-		target = VendingMachine.create();
+		MachineRepository repository = TestHelper.loadMemoryDB();
+		target = new VendingMachineBuilder().machine(MachineImpl.create().repository(repository)).build();
 	}
 
 	@Test

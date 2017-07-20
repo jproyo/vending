@@ -27,6 +27,17 @@ public class Product {
 	private Float price = 0.0f;
 
 	/**
+	 * Instantiates a new product.
+	 *
+	 * @param type the type
+	 * @param price the price
+	 */
+	public Product(ProductType type, Float price) {
+		this.type = type;
+		this.price = price;
+	}
+
+	/**
 	 * Gets the type.
 	 *
 	 * @return the type

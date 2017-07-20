@@ -15,20 +15,32 @@
  */
 package edu.jproyo.dojos.vending.model;
 
-import edu.jproyo.dojos.vending.model.ProductOrder.ProductOrderStatus;
-
 /**
  * The Class ProductOrder.
  */
 public class ProductOrder {
 	
 
-
 	/** The product requested. */
 	private Product productRequested;
 	
 	/** The status. */
-	private ProductOrderStatus status = ProductOrderStatus.paymentPending;
+	private ProductOrderStatus status = ProductOrderStatus.noSelected;
+	
+	/**
+	 * Instantiates a new product order.
+	 */
+	public ProductOrder(){
+	}
+	
+	/**
+	 * Instantiates a new product order.
+	 *
+	 * @param requested the requested
+	 */
+	public ProductOrder(Product requested){
+		this.productRequested = requested;
+	}
 
 	/**
 	 * Gets the status.
@@ -67,6 +79,24 @@ public class ProductOrder {
 	}
 	
 	/**
+	 * Gets the product requested.
+	 *
+	 * @return the product requested
+	 */
+	public Product getProductRequested() {
+		return productRequested;
+	}
+
+	/**
+	 * Sets the product requested.
+	 *
+	 * @param productRequested the new product requested
+	 */
+	public void setProductRequested(Product productRequested) {
+		this.productRequested = productRequested;
+	}
+
+	/**
 	 * The Enum ProductOrderStatus.
 	 */
 	public enum ProductOrderStatus {
@@ -81,7 +111,21 @@ public class ProductOrder {
 		delivered,
 		
 		/** The insuffient fund. */
-		insuffientFund
+		insuffientFund,
+		
+		/** The no selected. */
+		noSelected
+	}
+
+	/**
+	 * No selected.
+	 *
+	 * @return the product order
+	 */
+	public static ProductOrder noSelected() {
+		ProductOrder productOrder = new ProductOrder();
+		productOrder.setStatus(ProductOrderStatus.noSelected);
+		return productOrder;
 	}
 	
 

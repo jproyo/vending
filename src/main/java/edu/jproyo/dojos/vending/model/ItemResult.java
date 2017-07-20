@@ -172,4 +172,13 @@ public class ItemResult {
 		return result;
 	}
 
+	/**
+	 * Dipatched.
+	 *
+	 * @return true, if successful
+	 */
+	public boolean dipatched() {
+		return Result.delivered.equals(getResult());
+	}
+
 }

@@ -61,6 +61,7 @@ public class MachineImpl implements VendingMachine {
 	 */
 	@Override
 	public ProductOrder insertCoin(Float coin) {
+		validateMachineReady();
 		currentOrder.addPayment(coin);
 		return currentOrder;
 	}
@@ -70,10 +71,12 @@ public class MachineImpl implements VendingMachine {
 	 */
 	@Override
 	public ItemResult dispatch() {
+		validateMachineReady();
 		if(repository().productAvailable(currentOrder.getProductRequested().getType())){
 			ItemResult item = currentOrder.dispatch();
-			if(item != null){
+			if(item.dipatched()){
 				repository().updateStock(item);
+				cleanMachineState();
 			}
 			return item;
 		}else{
@@ -81,12 +84,29 @@ public class MachineImpl implements VendingMachine {
 		}
 	}
 
+	/**
+	 * Clean machine state.
+	 */
+	private void cleanMachineState() {
+		this.currentOrder = null;
+	}
+
 	/* (non-Javadoc)
 	 * @see edu.jproyo.dojos.vending.VendingMachine#cancel(edu.jproyo.dojos.vending.model.ProductOrder)
 	 */
 	@Override
-	public OrderResult cancel(ProductOrder order) {
-		return order.cancel();
+	public OrderResult cancel() {
+		validateMachineReady();
+		OrderResult cancel = currentOrder.cancel();
+		cleanMachineState();
+		return cancel;
+	}
+
+	/**
+	 * Validate machine ready.
+	 */
+	private void validateMachineReady() {
+		if(currentOrder == null) throw new IllegalStateException("You should select a product before start");
 	}
 
 	/* (non-Javadoc)
@@ -113,7 +133,7 @@ public class MachineImpl implements VendingMachine {
 		} catch (ExecutionException e) {
 		} catch (TimeoutException e) {
 		}finally{
-			currentOrder = null;
+			cleanMachineState();
 		}
 		return resetStatus;
 	}

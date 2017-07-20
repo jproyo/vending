@@ -1,6 +1,9 @@
 package edu.jproyo.dojos.vending;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -126,9 +129,39 @@ public class VendingMachineIntegrationTest {
 		ProductOrder order = target.select(ProductRequest.create().type(ProductType.coke).build());
 		assertNotNull(order);
 		assertTrue(order.paymentPending());
-		OrderResult cancel = target.cancel(order);
+		OrderResult cancel = target.cancel();
 		assertNotNull(cancel);
 		assertTrue(cancel.wasCancelled());
+	}
+	
+	@Test
+	public void testCancel_with_refund() {
+		ProductOrder order = target.select(ProductRequest.create().type(ProductType.coke).build());
+		assertNotNull(order);
+		assertTrue(order.paymentPending());
+		target.insertCoin(0.5f);
+		target.insertCoin(0.2f);
+		OrderResult cancel = target.cancel();
+		assertNotNull(cancel);
+		assertTrue(cancel.wasCancelled());
+		assertEquals(new Float(0.7f), cancel.getRefund());
+	}
+	
+	@Test
+	public void testCancel_already_delivered() {
+		ProductOrder order = target.select(ProductRequest.create().type(ProductType.coke).build());
+		assertNotNull(order);
+		assertTrue(order.paymentPending());
+		assertNotNull(target.insertCoin(1f));
+		assertNotNull(target.insertCoin(0.5f));
+		ItemResult dispatch = target.dispatch();
+		assertNotNull(dispatch);
+		assertEquals(Result.delivered, dispatch.getResult());
+		try {
+			target.cancel();
+			fail();
+		} catch (IllegalStateException e) {
+		}
 	}
 
 	@Test

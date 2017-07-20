@@ -44,10 +44,9 @@ public interface VendingMachine {
 	/**
 	 * Cancel.
 	 *
-	 * @param order the order
 	 * @return the order result
 	 */
-	public OrderResult cancel(ProductOrder order);
+	public OrderResult cancel();
 	
 	/**
 	 * Reset.

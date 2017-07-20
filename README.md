@@ -1,1 +1,1 @@
-# vending
+# Vending demo

@@ -10,8 +10,7 @@ public class MachineImpl implements VendingMachine {
 
 	@Override
 	public ProductOrder select(ProductRequest request) {
-		// TODO Auto-generated method stub
-		return null;
+		return new ProductOrder();
 	}
 
 	@Override

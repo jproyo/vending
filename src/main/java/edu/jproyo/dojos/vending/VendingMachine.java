@@ -45,7 +45,7 @@ public interface VendingMachine {
 	 *
 	 * @return the vending machine
 	 */
-	default VendingMachine create(){
+	public static VendingMachine create(){
 		return new VendingMachineBuilder().build();
 	}
 

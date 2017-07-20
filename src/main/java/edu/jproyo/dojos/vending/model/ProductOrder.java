@@ -15,6 +15,8 @@
  */
 package edu.jproyo.dojos.vending.model;
 
+import edu.jproyo.dojos.vending.model.OrderResult.OrderResultStatus;
+
 /**
  * The Class ProductOrder.
  */
@@ -40,6 +42,9 @@ public class ProductOrder {
 	 */
 	public ProductOrder(Product requested){
 		this.productRequested = requested;
+		if(!requested.isNotSelected()){
+			this.status = ProductOrderStatus.paymentPending;
+		}
 	}
 
 	/**
@@ -126,6 +131,43 @@ public class ProductOrder {
 		ProductOrder productOrder = new ProductOrder();
 		productOrder.setStatus(ProductOrderStatus.noSelected);
 		return productOrder;
+	}
+
+	/**
+	 * Cancel.
+	 *
+	 * @return the order result
+	 */
+	public OrderResult cancel() {
+		OrderResult result = new OrderResult();
+		switch(getStatus()){
+		case delivered: 
+			result.setStatus(OrderResultStatus.alreadyDelivered);
+			break;
+		case paymentPending:
+		case insuffientFund:
+		case noSelected:
+			result.setStatus(OrderResultStatus.cancelled);
+			break;
+		case processing:
+			if(cancelProcessing()){
+				result.setStatus(OrderResultStatus.cancelled);
+			}else{
+				result.setStatus(OrderResultStatus.couldNotBeCancelled);
+			}
+			break;
+		}
+		return result;
+	}
+
+	/**
+	 * Cancel processing.
+	 *
+	 * @return true, if successful
+	 */
+	private boolean cancelProcessing() {
+		// TODO Auto-generated method stub
+		return false;
 	}
 	
 

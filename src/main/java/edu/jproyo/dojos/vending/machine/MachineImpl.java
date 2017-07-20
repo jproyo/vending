@@ -16,6 +16,9 @@
 package edu.jproyo.dojos.vending.machine;
 
 import java.util.Optional;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import edu.jproyo.dojos.vending.VendingMachine;
 import edu.jproyo.dojos.vending.machine.dataaccess.MachineRepository;
@@ -23,6 +26,7 @@ import edu.jproyo.dojos.vending.machine.dataaccess.memory.OnMemoryRepository;
 import edu.jproyo.dojos.vending.model.OrderResult;
 import edu.jproyo.dojos.vending.model.ProductOrder;
 import edu.jproyo.dojos.vending.model.ProductRequest;
+import edu.jproyo.dojos.vending.model.ResetResult;
 import edu.jproyo.dojos.vending.model.ResetStatus;
 
 /**
@@ -48,17 +52,22 @@ public class MachineImpl implements VendingMachine {
 	 */
 	@Override
 	public OrderResult cancel(ProductOrder order) {
-		// TODO Auto-generated method stub
-		return null;
+		return order.cancel();
 	}
 
 	/* (non-Javadoc)
 	 * @see edu.jproyo.dojos.vending.VendingMachine#reset()
 	 */
 	@Override
-	public ResetStatus reset() {
-		// TODO Auto-generated method stub
-		return null;
+	public ResetResult reset() {
+		Future<ResetStatus> submit = Executors.newSingleThreadExecutor().submit(new Callable<ResetStatus>() {
+			@Override
+			public ResetStatus call() throws Exception {
+				Thread.sleep(1500l);
+				return ResetStatus.reseted;
+			}
+		});
+		return new ResetResult(submit);
 	}
 	
 	/**

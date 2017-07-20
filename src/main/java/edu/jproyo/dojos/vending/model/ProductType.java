@@ -4,6 +4,7 @@ public enum ProductType {
 	
 	coke,
 	sprite,
-	water
+	water,
+	noop
 
 }

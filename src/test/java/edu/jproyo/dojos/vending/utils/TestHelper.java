@@ -10,8 +10,8 @@ public class TestHelper {
 	public static MachineRepository loadMemoryDB() {
 		OnMemoryRepository repo = new OnMemoryRepository();
 		repo.getProducts().put(ProductType.coke, new Product(ProductType.coke, 1.5f));
-		repo.getProducts().put(ProductType.coke, new Product(ProductType.sprite, 1.45f));
-		repo.getProducts().put(ProductType.coke, new Product(ProductType.water, 0.9f));
+		repo.getProducts().put(ProductType.sprite, new Product(ProductType.sprite, 1.45f));
+		repo.getProducts().put(ProductType.water, new Product(ProductType.water, 0.9f));
 		return repo;
 	}
 

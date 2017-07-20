@@ -7,7 +7,7 @@ import edu.jproyo.dojos.vending.machine.VendingMachineBuilder;
 import edu.jproyo.dojos.vending.model.OrderResult;
 import edu.jproyo.dojos.vending.model.ProductOrder;
 import edu.jproyo.dojos.vending.model.ProductRequest;
-import edu.jproyo.dojos.vending.model.ResetStatus;
+import edu.jproyo.dojos.vending.model.ResetResult;
 
 /**
  * The Interface VendingMachine.
@@ -37,7 +37,7 @@ public interface VendingMachine {
 	 *
 	 * @return the reset status
 	 */
-	public ResetStatus reset();
+	public ResetResult reset();
 	
 	
 	/**

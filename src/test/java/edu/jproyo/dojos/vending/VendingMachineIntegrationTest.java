@@ -12,6 +12,7 @@ import edu.jproyo.dojos.vending.model.OrderResult;
 import edu.jproyo.dojos.vending.model.ProductOrder;
 import edu.jproyo.dojos.vending.model.ProductRequest;
 import edu.jproyo.dojos.vending.model.ProductType;
+import edu.jproyo.dojos.vending.model.ResetResult;
 import edu.jproyo.dojos.vending.utils.TestHelper;
 
 public class VendingMachineIntegrationTest {
@@ -36,6 +37,7 @@ public class VendingMachineIntegrationTest {
 	public void testCancel() {
 		ProductOrder order = target.select(ProductRequest.create().type(ProductType.coke).build());
 		assertNotNull(order);
+		assertTrue(order.paymentPending());
 		OrderResult cancel = target.cancel(order);
 		assertNotNull(cancel);
 		assertTrue(cancel.wasCancelled());
@@ -43,7 +45,15 @@ public class VendingMachineIntegrationTest {
 
 	@Test
 	public void testReset() {
-		fail("Not yet implemented");
+		ResetResult reset = target.reset();
+		assertNotNull(reset);
+		assertTrue(reset.reseting());
+		try {
+			Thread.sleep(2000l);
+		} catch (InterruptedException e) {
+			fail();
+		}
+		assertTrue(reset.reseted());
 	}
 
 }

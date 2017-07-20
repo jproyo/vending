@@ -1,5 +1,16 @@
 package edu.jproyo.dojos.vending.model;
 
-public class ResetStatus {
-
+/**
+ * The Enum Status.
+ */
+public enum ResetStatus {
+	
+	/** The reseting. */
+	reseting,
+	
+	/** The could not be reset. */
+	couldNotBeReset,
+	
+	/** The reseted. */
+	reseted
 }

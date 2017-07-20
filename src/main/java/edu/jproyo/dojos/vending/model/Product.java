@@ -72,6 +72,16 @@ public class Product {
 	public void setPrice(Float price) {
 		this.price = price;
 	}
+	
+
+	/**
+	 * Checks if is not selected.
+	 *
+	 * @return true, if is not selected
+	 */
+	public boolean isNotSelected() {
+		return ProductType.noop.equals(getType());
+	}
 
 	/* (non-Javadoc)
 	 * @see java.lang.Object#hashCode()
@@ -106,4 +116,5 @@ public class Product {
 			return false;
 		return true;
 	}
+
 }

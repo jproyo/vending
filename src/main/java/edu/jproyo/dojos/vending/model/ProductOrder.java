@@ -119,6 +119,33 @@ public class ProductOrder {
 	}
 	
 	/**
+	 * Gets the import payed.
+	 *
+	 * @return the import payed
+	 */
+	public Float getImportPayed() {
+		return importPayed;
+	}
+
+	/**
+	 * Sets the import payed.
+	 *
+	 * @param importPayed the new import payed
+	 */
+	public void setImportPayed(Float importPayed) {
+		this.importPayed = importPayed;
+	}
+
+	/**
+	 * Gets the change.
+	 *
+	 * @return the change
+	 */
+	public Float getChange() {
+		return this.importPayed - getProductRequested().getPrice();
+	}
+
+	/**
 	 * Adds the payment.
 	 *
 	 * @param coin the coin
@@ -156,30 +183,31 @@ public class ProductOrder {
 	}
 
 	/**
-	 * Gets the import payed.
+	 * Dispatch.
 	 *
-	 * @return the import payed
+	 * @return the item result
 	 */
-	public Float getImportPayed() {
-		return importPayed;
+	public ItemResult dispatch() {
+		ItemResult result = new ItemResult();
+		result.setProduct(getProductRequested());
+		if(paymentReady()){
+			result.setResult(Result.delivered);
+			result.setChange(getChange());
+		}else{
+			result.setResult(Result.insufficientFunds);
+		}
+		return result;
 	}
 
 	/**
-	 * Sets the import payed.
+	 * No selected.
 	 *
-	 * @param importPayed the new import payed
+	 * @return the product order
 	 */
-	public void setImportPayed(Float importPayed) {
-		this.importPayed = importPayed;
-	}
-
-	/**
-	 * Gets the change.
-	 *
-	 * @return the change
-	 */
-	public Float getChange() {
-		return this.importPayed - getProductRequested().getPrice();
+	public static ProductOrder noSelected() {
+		ProductOrder productOrder = new ProductOrder();
+		productOrder.setStatus(ProductOrderStatus.noSelected);
+		return productOrder;
 	}
 
 	/**
@@ -198,34 +226,6 @@ public class ProductOrder {
 		
 		/** The no selected. */
 		noSelected
-	}
-
-	/**
-	 * No selected.
-	 *
-	 * @return the product order
-	 */
-	public static ProductOrder noSelected() {
-		ProductOrder productOrder = new ProductOrder();
-		productOrder.setStatus(ProductOrderStatus.noSelected);
-		return productOrder;
-	}
-
-	/**
-	 * Dispatch.
-	 *
-	 * @return the item result
-	 */
-	public ItemResult dispatch() {
-		ItemResult result = new ItemResult();
-		result.setProduct(getProductRequested());
-		if(paymentReady()){
-			result.setResult(Result.delivered);
-			result.setChange(getChange());
-		}else{
-			result.setResult(Result.insufficientFunds);
-		}
-		return result;
 	}
 	
 

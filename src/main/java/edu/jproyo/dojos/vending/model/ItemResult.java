@@ -141,19 +141,12 @@ public class ItemResult {
 	
 	
 	/**
-	 * The Enum Result.
+	 * Dipatched.
+	 *
+	 * @return true, if successful
 	 */
-	public enum Result {
-		
-		/** The delivered. */
-		delivered,
-		
-		/** The insufficient funds. */
-		insufficientFunds,
-		
-		/** The no stock. */
-		noStock
-
+	public boolean dipatched() {
+		return Result.delivered.equals(getResult());
 	}
 
 
@@ -172,13 +165,22 @@ public class ItemResult {
 		return result;
 	}
 
+
+
 	/**
-	 * Dipatched.
-	 *
-	 * @return true, if successful
+	 * The Enum Result.
 	 */
-	public boolean dipatched() {
-		return Result.delivered.equals(getResult());
+	public enum Result {
+		
+		/** The delivered. */
+		delivered,
+		
+		/** The insufficient funds. */
+		insufficientFunds,
+		
+		/** The no stock. */
+		noStock
+
 	}
 
 }

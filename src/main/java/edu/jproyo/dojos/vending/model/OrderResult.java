@@ -55,6 +55,24 @@ public class OrderResult {
 	}
 	
 	/**
+	 * Sets the refund.
+	 *
+	 * @param refund the new refund
+	 */
+	public void setRefund(Float refund) {
+		this.refund = refund;
+	}
+
+	/**
+	 * Gets the refund.
+	 *
+	 * @return the refund
+	 */
+	public Float getRefund() {
+		return refund;
+	}
+
+	/**
 	 * The Enum OrderResultStatus.
 	 */
 	public enum OrderResultStatus {
@@ -68,24 +86,6 @@ public class OrderResult {
 		/** The noop. */
 		noop
 
-	}
-
-	/**
-	 * Sets the refund.
-	 *
-	 * @param refund the new refund
-	 */
-	public void setRefund(Float refund) {
-		this.refund = refund;
-	}
-	
-	/**
-	 * Gets the refund.
-	 *
-	 * @return the refund
-	 */
-	public Float getRefund() {
-		return refund;
 	}
 
 }
